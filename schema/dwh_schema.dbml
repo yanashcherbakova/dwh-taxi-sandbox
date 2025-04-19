@@ -1,0 +1,78 @@
+
+Table trips {
+  id integer [primary key]
+  passenger_id integer //synthetically generated
+  driver_id integer //synthetically generated
+  vendor_id integer
+  payment_id integer //synthetically generated
+  payment_method_id integer //synthetically generated
+  pickup_datetime timestamp
+  dropoff_datetime timestamp
+  duration_min integer //will be calculated
+  passenger_count integer
+  pickup_longitude float
+  pickup_latitude float
+  dropoff_longitude float
+  dropoff_latitude float
+  score decimal //synthetically generated
+}
+
+Table passenger {  //synthetically generated
+  passanger_id integer [primary key]
+  first_name varchar
+  last_name varchar
+  age integer
+  raiting decimal
+}
+
+Table driver { //synthetically generated
+  driver_id integer [primary key]
+  first_name varchar
+  last_name varchar
+  raiting decimal
+}
+
+Table driver_vehicle { //synthetically generated
+  vehicle_id integer [primary key]
+  driver_id integer
+  plate_number varchar
+  color_id integer
+}
+
+Table vehicle_info { //synthetically generated
+  vehicle_id integer [primary key]
+  make varchar
+  model varchar
+  vehicle_year integer
+}
+
+Table car_color{ //synthetically generated
+  color_id integer [primary key]
+  color_name varchar
+}
+
+Table vendor { //synthetically generated
+  vendor_id integer [primary key]
+  company_name varchar
+}
+
+Table payment_method { //synthetically generated
+  payment_method_id integer [primary key]
+  name varchar
+}
+
+Table payment { //synthetically generated
+  payment_id integer [primary key]
+  payment_method_id integer
+  amount decimal
+  tips decimal
+}
+
+Ref: trips.passenger_id < passenger.passanger_id
+Ref: trips.driver_id < driver.driver_id
+Ref: trips.vendor_id < vendor.vendor_id
+Ref: trips.payment_id < payment.payment_id
+Ref: payment.payment_method_id < payment_method.payment_method_id
+Ref: driver.driver_id < driver_vehicle.driver_id
+Ref: driver_vehicle.color_id < car_color.color_id
+Ref: driver_vehicle.vehicle_id < vehicle_info.vehicle_id
