@@ -5,7 +5,7 @@ import string
 from datetime import datetime, timedelta
 
 
-def generate_payment_ids(n):
+def generate_payment_ids(n=1):
     ids = set()
     while len(ids) < n:
         part1 = ''.join(random.choices(string.ascii_uppercase, k=3))
@@ -15,7 +15,7 @@ def generate_payment_ids(n):
     return list(ids)
 
 
-def generate_plate_number(n):
+def generate_plate_number(n=1):
     numbers = set()
     while len(numbers) < n:
         part1 = ''.join(random.choices(string.ascii_uppercase, k=1))
@@ -49,3 +49,8 @@ def generate_time():
     end = datetime.now()
     start = end - timedelta(minutes= duration)
     return [start, end, duration]
+
+
+def if_exists(value, table_name, column, client):
+    query = f'SELECT count() FROM {table_name} WHERE {column} = {value}'
+    return client.query(query).result_rows[0][0] > 0

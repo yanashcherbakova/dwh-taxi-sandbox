@@ -14,6 +14,7 @@ df['vendor_id'] = generate_int_range(1,21, len(df))
 df['payment_id'] = generate_payment_ids(len(df))
 df['payment_method_id'] = generate_int_range(1,7, len(df))
 df['score'] = generate_int_range(1,6, len(df))
+df['trip_duration'] = df['trip_duration'] // 60
 
 mask = np.random.rand(len(df)) < 0.3
 df.loc[mask, 'score'] = np.nan
@@ -117,7 +118,7 @@ df.to_csv('/Users/Yana/DWH_taxi_sandbox/synthetic_df_output/synth.csv', index=Fa
 def drop_dup(df):
     return df.drop_duplicates().reset_index(drop=True)
 
-trips_table = df[['id', 'passenger_id', 'driver_id', 'vendor_id', 'payment_id', 'payment_method_id', 'pickup_datetime', 'trip_duration', 'passenger_count', 'pickup_longitude', 'dropoff_longitude', 'pickup_latitude', 'dropoff_latitude', 'score']]
+trips_table = df[['id', 'passenger_id', 'driver_id', 'vendor_id', 'payment_id', 'pickup_datetime', 'dropoff_datetime','trip_duration', 'passenger_count', 'pickup_longitude', 'dropoff_longitude', 'pickup_latitude', 'dropoff_latitude', 'score']]
 passenger_table = df[['passenger_id', 'passenger_first_name', 'passenger_last_name', 'passenger_age', 'passenger_rating']]
 driver_table = df[['driver_id', 'driver_first_name', 'driver_last_name', 'driver_rating']]
 driver_vehicle_table = df[['vehicle_id', 'driver_id', 'plate_number', 'color_id']]
