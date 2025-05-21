@@ -12,6 +12,8 @@ def generate_payment_ids(n=1):
         part2 = ''.join(random.choices(string.digits, k=4))
         payment_id = 'PAY-' + part1 + part2
         ids.add(payment_id)
+    if n == 1:
+        return list(ids)[0]
     return list(ids)
 
 
@@ -24,10 +26,14 @@ def generate_plate_number(n=1):
         part4 = ''.join(random.choices(string.digits, k=1))
         plate_number = part1 + part2 + part3 + part4
         numbers.add(plate_number)
+    if n == 1:
+        return list(numbers)[0]
     return list(numbers)
 
 
 def generate_int_range(start, end, volume=1):
+    if volume == 1:
+        return int(np.random.randint(start, end, size=1))
     return np.random.randint(start, end, size=volume)
     
  
@@ -52,5 +58,10 @@ def generate_time():
 
 
 def if_exists(value, table_name, column, client):
-    query = f'SELECT count() FROM {table_name} WHERE {column} = {value}'
+
+    if isinstance(value, list) and len(value) == 1:
+        value = value[0]
+
+    val = f"'{value}'" if isinstance(value, str) else value
+    query = f'SELECT count() FROM {table_name} WHERE {column} = {val}'
     return client.query(query).result_rows[0][0] > 0

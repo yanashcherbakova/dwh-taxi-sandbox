@@ -1,3 +1,4 @@
+
 import pandas as pd
 import numpy as np
 import random
@@ -5,18 +6,23 @@ from faker import Faker
 from Generation_func import generate_plate_number, generate_int_range, generate_payment_ids, generate_time, generate_location, if_exists
 from car_info import car_models, car_colors
 from clickhouse_connect import get_client
-
-client = get_client(host='localhost', database='analytics')
 fake = Faker()
 
-def clickhouse_insert(table_name, info):
-    client.insert(
-        table=table_name,
-        data=info
-    )
+def clickhouse_insert(client, table_name, info):
+    print(f'Inserting into {table_name}: {info}')
+    df = pd.DataFrame([info])
 
-def generate_trip(client):
+    client.insert_df(table=table_name, df=df)
+
+def generate_trip(host, database, username, password, **kwargs):
+    client = get_client(
+        host=host,
+        database=database,
+        username=username,
+        password=password
+    )
     new_pass = generate_int_range(100, 10000)
+    print(f"DEBUG new_pass = {new_pass} ({type(new_pass)})")
     if not if_exists(new_pass, 'passenger_table', 'passenger_id', client):
         new_pass_info = {
             'passenger_id' : new_pass,
@@ -25,7 +31,7 @@ def generate_trip(client):
             'passenger_age' : generate_int_range(18,100),
             'passenger_raiting' : generate_int_range(1,6)
         }
-        clickhouse_insert('passenger_table', new_pass_info)
+        clickhouse_insert(client, 'passenger_table', new_pass_info)
 
 
     new_driver = generate_int_range(100, 10000)
@@ -36,7 +42,7 @@ def generate_trip(client):
             'driver_last_name' : fake.last_name(),
             'driver_rating' : generate_int_range(1,6)
         }
-        clickhouse_insert('driver_table', new_driver_info)
+        clickhouse_insert(client, 'driver_table', new_driver_info)
 
         max_vehicle_id = client.query("SELECT max(vehicle_id) FROM driver_vehicle").result_rows
         new_vehicle_id = max_vehicle_id[0][0] + 1
@@ -46,7 +52,7 @@ def generate_trip(client):
             'plate_number' : generate_plate_number(),
             'color_id' : generate_int_range(1,14)
         }
-        clickhouse_insert('driver_vehicle', new_driver_vehicle_info)
+        clickhouse_insert(client, 'driver_vehicle', new_driver_vehicle_info)
 
         make = np.random.choice(list(car_models.keys()))
         model = np.random.choice(car_models[make])
@@ -56,7 +62,7 @@ def generate_trip(client):
             'model' : model,
             'vehicle_year' : generate_int_range(1960, 2026)
         }
-        clickhouse_insert('vehicle_info', new_vehicle_info)
+        clickhouse_insert(client, 'vehicle_info', new_vehicle_info)
 
     new_payment_method_id = generate_int_range(1,7)
     new_amount = np.round(np.random.uniform(20.0, 120.0), 2)
@@ -67,9 +73,9 @@ def generate_trip(client):
         'payment_id' : new_payment_id,
         'payment_method_id' : new_payment_method_id,
         'amount' : new_amount,
-        'tips' : np.round(new_amount * tips_percent, 2)
+        'tips' : float(np.round(new_amount * tips_percent, 2))
     }
-    clickhouse_insert('payment', payment_info)
+    clickhouse_insert(client, 'payment', payment_info)
 
     pickup_dt, dropoff_dt, duration = generate_time()
 
@@ -86,7 +92,7 @@ def generate_trip(client):
         'payment_id' : new_payment_id,
         'pickup_datetime' : pickup_dt,
         'dropoff_datetime' : dropoff_dt,
-        'duration_min' : duration,
+        'trip_duration' : duration,
         'passenger_count' : generate_int_range(1,6),
         'pickup_longitude' : generate_location('lon'),
         'pickup_latitude' : generate_location('lat'),
@@ -94,5 +100,11 @@ def generate_trip(client):
         'dropoff_latitude' : generate_location('lat'),
         'score' : generate_int_range(1,6)
     }
-    clickhouse_insert('trips_table', trips_info)
+    clickhouse_insert(client, 'trips_table', trips_info)
+
+    print('Trip successfully created')
+    print(f"Trip ID : {trips_info['id']}")
+    print(f"Passenger ID : {trips_info['passenger_id']}")
+    print(f"Driver ID : {trips_info['driver_id']}")
+    print(f"Duration : {trips_info['trip_duration']} minutes")
 
