@@ -68,7 +68,7 @@ def generate_trip(host, database, username, password, **kwargs):
     new_amount = np.round(np.random.uniform(20.0, 120.0), 2)
     tip_percentages = [0.03, 0.05, 0.07, 0.10]
     tips_percent = np.random.choice(tip_percentages)
-    new_payment_id = generate_payment_ids()[0]
+    new_payment_id = generate_payment_ids()
     payment_info = {
         'payment_id' : new_payment_id,
         'payment_method_id' : new_payment_method_id,
