@@ -9,7 +9,7 @@ The source dataset is extended with synthetic dimensions to support a fully norm
 
 ## Schema
 
-- ER Diagram: ![Schema](schema/Schema_v1.png)
+- ER Diagram: ![Schema](schema/Schema_v.1.0.png)
 - Logical DBML: [`dwh_schema.dbml`](schema/dwh_schema.dbml)
 
 ## Tools & Setup
@@ -78,7 +78,7 @@ This section describes the full lifecycle of data flow in the project, from data
    - `synth.csv` contains the combined dataset with all extended fields in a denormalized format, primarily for testing or initial exploration.
    - The remaining `.csv` files represent normalized tables (e.g. `passenger_table.csv`, `driver_table.csv`, etc.) that form the snowflake schema and are ready to be loaded into ClickHouse.
 
-   ![Schema](schema/Schema_v1.png)
+   ![Schema](schema/Schema_v.1.0.png)
 
 3. **Storage in ClickHouse**  
    The database schema was first defined using a custom SQL script:  
