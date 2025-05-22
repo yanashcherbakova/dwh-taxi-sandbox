@@ -1,0 +1,4 @@
+clickhouse-connect==0.6.5
+pandas==2.2.2
+faker==25.2.0
+python-dotenv==1.0.1

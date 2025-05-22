@@ -9,8 +9,7 @@ client = get_client(
     host='localhost',
     database='analytics',
     username='yana',
-    password = '1147'
-    #password= os.getenv('CLICKHOUSE_PASSWORD')
+    password= os.getenv('CLICKHOUSE_PASSWORD')
 )
 
 queries = {
