@@ -1,4 +1,3 @@
-
 import pandas as pd
 import numpy as np
 import random
@@ -21,48 +20,51 @@ def generate_trip(host, database, username, password, **kwargs):
         username=username,
         password=password
     )
-    new_pass = generate_int_range(100, 10000)
-    print(f"DEBUG new_pass = {new_pass} ({type(new_pass)})")
-    if not if_exists(new_pass, 'passenger_table', 'passenger_id', client):
-        new_pass_info = {
-            'passenger_id' : new_pass,
-            'passenger_first_name' : fake.first_name(),
-            'passenger_last_name' : fake.last_name(),
-            'passenger_age' : generate_int_range(18,100),
-            'passenger_raiting' : generate_int_range(1,6)
-        }
-        clickhouse_insert(client, 'passenger_table', new_pass_info)
+    
+    for _ in range(25):
+        new_pass = generate_int_range(100, 10000)
+        if not if_exists(new_pass, 'passenger_table', 'passenger_id', client):
+            new_pass_info = {
+                'passenger_id' : new_pass,
+                'passenger_first_name' : fake.first_name(),
+                'passenger_last_name' : fake.last_name(),
+                'passenger_age' : generate_int_range(18,100),
+                'passenger_raiting' : generate_int_range(1,6)
+                }
+            clickhouse_insert(client, 'passenger_table', new_pass_info)
+            break
 
+    for _ in range(10):
+        new_driver = generate_int_range(100, 10000)
+        if not if_exists(new_driver, 'driver_table', 'driver_id', client):
+            new_driver_info = {
+                'driver_id' : new_driver,
+                'driver_first_name' : fake.first_name(),
+                'driver_last_name' : fake.last_name(),
+                'driver_rating' : generate_int_range(1,6)
+            }
+            clickhouse_insert(client, 'driver_table', new_driver_info)
 
-    new_driver = generate_int_range(100, 10000)
-    if not if_exists(new_driver, 'driver_table', 'driver_id', client):
-        new_driver_info = {
-            'driver_id' : new_driver,
-            'driver_first_name' : fake.first_name(),
-            'driver_last_name' : fake.last_name(),
-            'driver_rating' : generate_int_range(1,6)
-        }
-        clickhouse_insert(client, 'driver_table', new_driver_info)
+            max_vehicle_id = client.query("SELECT max(vehicle_id) FROM driver_vehicle").result_rows
+            new_vehicle_id = max_vehicle_id[0][0] + 1
+            new_driver_vehicle_info = {
+                'vehicle_id' : new_vehicle_id,
+                'driver_id' : new_driver,
+                'plate_number' : generate_plate_number(),
+                'color_id' : generate_int_range(1,14)
+            }
+            clickhouse_insert(client, 'driver_vehicle', new_driver_vehicle_info)
 
-        max_vehicle_id = client.query("SELECT max(vehicle_id) FROM driver_vehicle").result_rows
-        new_vehicle_id = max_vehicle_id[0][0] + 1
-        new_driver_vehicle_info = {
-            'vehicle_id' : new_vehicle_id,
-            'driver_id' : new_driver,
-            'plate_number' : generate_plate_number(),
-            'color_id' : generate_int_range(1,14)
-        }
-        clickhouse_insert(client, 'driver_vehicle', new_driver_vehicle_info)
-
-        make = np.random.choice(list(car_models.keys()))
-        model = np.random.choice(car_models[make])
-        new_vehicle_info = {
-            'vehicle_id' : new_driver_vehicle_info['vehicle_id'],
-            'make' : make,
-            'model' : model,
-            'vehicle_year' : generate_int_range(1960, 2026)
-        }
-        clickhouse_insert(client, 'vehicle_info', new_vehicle_info)
+            make = np.random.choice(list(car_models.keys()))
+            model = np.random.choice(car_models[make])
+            new_vehicle_info = {
+                'vehicle_id' : new_driver_vehicle_info['vehicle_id'],
+                'make' : make,
+                'model' : model,
+                'vehicle_year' : generate_int_range(1960, 2026)
+            }
+            clickhouse_insert(client, 'vehicle_info', new_vehicle_info)
+            break
 
     new_payment_method_id = generate_int_range(1,7)
     new_amount = np.round(np.random.uniform(20.0, 120.0), 2)
